@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "weatherwatch",
+  "version": "${version}",
+  "name": "WeatherWatch",
+  "description": "",
+  "authors": ["Consular"],
+  "contact": {
+    "homepage": ""  },
+  "license": "MIT",
+  "icon": "assets/weatherwatch/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "consular.weatherwatch.weatherwatch.fabric.WeatherWatchFabric"
+    ],
+    "client": [
+      "consular.weatherwatch.weatherwatch.fabric.client.WeatherWatchFabricClient"
+    ]
+  },
+  "mixins": [
+    "weatherwatch.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+    ,"architectury": ">=13.0.8"
+    ,"fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
