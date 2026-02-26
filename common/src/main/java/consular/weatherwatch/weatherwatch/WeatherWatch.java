@@ -64,7 +64,9 @@ public final class WeatherWatch {
             } else {
                 server.overworld().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, server);
             }
-            MinecraftTimeSync.syncRealTimeToMinecraft(server.overworld());
+            if (Config.DEFAULT.isSyncTimeEnabled()) {
+                MinecraftTimeSync.syncRealTimeToMinecraft(server.overworld());
+            }
             WeatherWatch.weatherTickCounter++;
             if (WeatherWatch.weatherTickCounter >= 6000 && (Config.DEFAULT.isSyncWeatherEnabled() || Config.DEFAULT.isSyncMoonPhaseEnabled())) {
                 WeatherSyncManager.syncWeather(server.overworld());

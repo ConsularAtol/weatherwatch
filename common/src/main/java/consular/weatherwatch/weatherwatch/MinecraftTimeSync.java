@@ -15,21 +15,21 @@ public class MinecraftTimeSync {
     private static final AtomicBoolean tzFetchInProgress = new AtomicBoolean(false);
 
     public static void syncRealTimeToMinecraft(ServerLevel world) {
-        if (Config.DEFAULT.isSyncTimeEnabled()) {
-            if (WeatherWatch.TIMEZONE_ID == null || WeatherWatch.TIMEZONE_ID.isBlank()) {
-                if (tzFetchInProgress.compareAndSet(false, true)) {
-                    CompletableFuture.runAsync(() -> {
-                        try {
-                            String tz = weatherLib.fetchTimezoneForServer();
-                            if (tz != null && !tz.isBlank()) {
-                                WeatherWatch.TIMEZONE_ID = tz;
-                            }
-                        } catch (Exception ignored) {
-                        } finally {
-                            tzFetchInProgress.set(false);
+        if (!Config.DEFAULT.isSyncTimeEnabled()) return;
+
+        if (WeatherWatch.TIMEZONE_ID == null || WeatherWatch.TIMEZONE_ID.isBlank()) {
+            if (tzFetchInProgress.compareAndSet(false, true)) {
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        String tz = weatherLib.fetchTimezoneForServer();
+                        if (tz != null && !tz.isBlank()) {
+                            WeatherWatch.TIMEZONE_ID = tz;
                         }
-                    });
-                }
+                    } catch (Exception ignored) {
+                    } finally {
+                        tzFetchInProgress.set(false);
+                    }
+                });
             }
         }
 
