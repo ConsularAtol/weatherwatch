@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/ConsularAtol/weatherwatch.svg)](https://jitpack.io/#ConsularAtol/weatherwatch)
+
 # Weather Watch
 Weather Watch is a mod that focuses on matching the in-game weather to the real life weather in your area. If it's stormy outside, it'll match that in game!
 
