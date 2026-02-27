@@ -74,9 +74,14 @@ public final class WeatherWatch {
             }
 
             WeatherWatch.seasonTickCounter++;
-            if (Config.DEFAULT.isSyncSeasonsEnabled() && Platform.isModLoaded("sereneseasons") && WeatherWatch.seasonTickCounter >= 1200) {
+            if (Platform.isModLoaded("sereneseasons") && WeatherWatch.seasonTickCounter >= 1200) {
                 WeatherWatch.seasonTickCounter = 0;
-                server.overworld().getGameRules().getRule(SSGameRules.RULE_DOSEASONCYCLE).set(true, server);
+                if (Config.DEFAULT.isSyncSeasonsEnabled()) {
+                    server.overworld().getGameRules().getRule(SSGameRules.RULE_DOSEASONCYCLE).set(false, server);
+                }
+                else {
+                    server.overworld().getGameRules().getRule(SSGameRules.RULE_DOSEASONCYCLE).set(true, server);
+                }
                 for (ServerLevel world : server.getAllLevels()) {
                     SeasonSyncManager.syncSeasons(world);
                 }
