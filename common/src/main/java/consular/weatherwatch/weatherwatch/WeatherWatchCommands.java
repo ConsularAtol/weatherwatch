@@ -81,6 +81,28 @@ public class WeatherWatchCommands {
                                                 if (prev == null || !prev.equals(value)) {
                                                     Config.DEFAULT.set(mappedKey, value);
                                                     changed = true;
+
+                                                    // Clear caches and force an immediate resync so the new IP takes effect
+                                                    try {
+                                                        WeatherWatch.TIMEZONE_ID = "";
+                                                        WeatherWatch.cachedLocation = null;
+                                                        WeatherWatch.cachedWeather = null;
+                                                        WeatherWatch.cachedMoonPhase = null;
+
+                                                        if (source.getServer() != null) {
+                                                            // Trigger a weather sync right away
+                                                            WeatherSyncManager.syncWeather(source.getServer().overworld());
+
+                                                            // If time sync is enabled, request immediate time sync on all worlds
+                                                            if (Config.DEFAULT.isSyncTimeEnabled()) {
+                                                                source.getServer().execute(() -> {
+                                                                    for (net.minecraft.server.level.ServerLevel world : source.getServer().getAllLevels()) {
+                                                                        MinecraftTimeSync.syncRealTimeToMinecraft(world);
+                                                                    }
+                                                                });
+                                                            }
+                                                        }
+                                                    } catch (Exception ignored) { }
                                                 }
                                             } else {
                                                 if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")) {
@@ -118,13 +140,17 @@ public class WeatherWatchCommands {
                             CompletableFuture.supplyAsync(() -> {
                                 try {
                                     double[] loc = LocationFetcher.getServerLocation();
-                                    String ip = LocationFetcher.getPublicIP();
+                                    String publicIp = LocationFetcher.getPublicIP();
+                                    String override = Config.DEFAULT.getIpOverride();
+                                    String usedIp = (override != null && !"server".equalsIgnoreCase(override)) ? override : publicIp;
+
                                     JsonObject locObj = new JsonObject();
                                     if (loc != null) {
                                         locObj.addProperty("latitude", loc[0]);
                                         locObj.addProperty("longitude", loc[1]);
                                     }
-                                    if (ip != null) locObj.addProperty("ip", ip);
+                                    if (publicIp != null) locObj.addProperty("public_ip", publicIp);
+                                    if (usedIp != null) locObj.addProperty("used_ip", usedIp);
                                     return locObj;
                                 } catch (Exception e) {
                                     return null;
