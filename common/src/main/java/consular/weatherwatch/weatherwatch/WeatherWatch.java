@@ -5,7 +5,7 @@ import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.platform.Platform;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import sereneseasons.api.SSGameRules;
 
 import java.time.ZoneId;
@@ -30,7 +30,7 @@ public final class WeatherWatch {
         }
 
         LifecycleEvent.SERVER_STARTED.register(server -> {
-            server.overworld().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, server);
+            server.overworld().getGameRules().set(GameRules.ADVANCE_WEATHER, true, server);
 
             double[] location = LocationFetcher.getServerLocation();
             if (location != null) {
@@ -46,9 +46,9 @@ public final class WeatherWatch {
                 WeatherWatch.cachedLocation = null;
             }
             if (Config.DEFAULT.isSyncWeatherEnabled()) {
-                server.overworld().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
+                server.overworld().getGameRules().set(GameRules.ADVANCE_WEATHER, false, server);
             } else {
-                server.overworld().getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(true, server);
+                server.overworld().getGameRules().set(GameRules.ADVANCE_WEATHER, true, server);
             }
             WeatherSyncManager.syncWeather(server.overworld());
             if (Config.DEFAULT.isSyncSeasonsEnabled() && Platform.isModLoaded("sereneseasons")) {
@@ -60,9 +60,9 @@ public final class WeatherWatch {
 
         TickEvent.SERVER_POST.register(server -> {
             if (Config.DEFAULT.isSyncTimeEnabled()) {
-                server.overworld().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, server);
+                server.overworld().getGameRules().set(GameRules.ADVANCE_TIME, false, server);
             } else {
-                server.overworld().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, server);
+                server.overworld().getGameRules().set(GameRules.ADVANCE_TIME, true, server);
             }
             if (Config.DEFAULT.isSyncTimeEnabled()) {
                 MinecraftTimeSync.syncRealTimeToMinecraft(server.overworld());
@@ -74,9 +74,13 @@ public final class WeatherWatch {
             }
 
             WeatherWatch.seasonTickCounter++;
-            if (Config.DEFAULT.isSyncSeasonsEnabled() && Platform.isModLoaded("sereneseasons") && WeatherWatch.seasonTickCounter >= 1200) {
+            if (Platform.isModLoaded("sereneseasons") && WeatherWatch.seasonTickCounter >= 1200) {
                 WeatherWatch.seasonTickCounter = 0;
-                server.overworld().getGameRules().getRule(SSGameRules.RULE_DOSEASONCYCLE).set(true, server);
+                if (Config.DEFAULT.isSyncSeasonsEnabled()) {
+                    server.overworld().getGameRules().set(SSGameRules.RULE_DOSEASONCYCLE, false, server);
+                } else {
+                    server.overworld().getGameRules().set(SSGameRules.RULE_DOSEASONCYCLE, true, server);
+                }
                 for (ServerLevel world : server.getAllLevels()) {
                     SeasonSyncManager.syncSeasons(world);
                 }
